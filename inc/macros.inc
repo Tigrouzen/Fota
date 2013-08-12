@@ -109,9 +109,9 @@ fota_dload_mode:
 
 	used_download				dw 0x0
 
-	s_atagcmdlineRM 			db 'bootmode=2 loglevel=0',0
-	s_atagcmdline				db 'loglevel=0',0
-	s_atagcmdlineRMb			db 'bootmode=10 loglevel=0',0
+	s_atagcmdlineRM 			db 'recovery',0
+	s_atagcmdline				db 'normal',0
+	s_atagcmdlineRMb			db 'bigmem',0
 
 	align 4
 
