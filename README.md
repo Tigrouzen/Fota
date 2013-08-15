@@ -5,8 +5,8 @@ Bootloader for Samsung Wave(Orjinally from Mijoma, Rebellos, ihavenick, Tigrouze
 Compile this Beatiful thing with FASM
 
 - Power = Bada
-- Power + Call = FireFox
-- Power + Home = Android
+- Power + Call = FireFox /sdcard/kernel/firefox kernel renamed
+- Power + Home = Android /sdcard/kernel/android kernel renamed
 - Power + Cam = Recovery Mode
 - Power + VolUp = Rom 2
-- Power + VOlDown = Phone kernel
+- Power + VolDown = Phone kernel internal kernel for other rom like Reb and Volk
