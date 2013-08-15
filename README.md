@@ -4,7 +4,9 @@ Bootloader for Samsung Wave(Orjinally from Mijoma, Rebellos, ihavenick, Tigrouze
 
 Compile this Beatiful thing with FASM
 
-- Power = Android
-- Power + Call = Bada
-- Power + Home = Recovery Mode
-- Power + VolUp = Bigmem
+- Power = Bada
+- Power + Call = FireFox
+- Power + Home = Android
+- Power + Cam = Recovery Mode
+- Power + VolUp = Rom 2
+- Power + VOlDown = Phone kernel
