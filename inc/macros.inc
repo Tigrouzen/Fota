@@ -31,10 +31,10 @@ NORETURN fix b $
 macro include_once name
 {
 macro name {
-	if ~defined name#_INCLUDED
-	name#_INCLUDED equ 1
+        if ~defined name#_INCLUDED
+        name#_INCLUDED equ 1
 
-	align 4
+        align 4
 }
 INCLUDE_ONCE fix include_once
 END_INCLUDE_ONCE fix end if }
@@ -42,78 +42,103 @@ END_INCLUDE_ONCE fix end if }
 
 macro START
 {
-	format binary as 'fota'
+        format binary as 'fota'
 
-	processor 0x2FFFFFE
-	coprocessor 0x30F8
+        processor 0x2FFFFFE
+        coprocessor 0x30F8
 
-	org FOTA_DRAM_START
-	align 4
+        org FOTA_DRAM_START
+        align 4
 
 c_start:
 
-	b	c_run
+        b       c_run
 
 f_ver:
-	db 0x100 - ( f_ver - c_start ) dup 0
-	db 'FOTA_ENGINE_VER_INFO_2.0'
-	db 232 dup 0
-	dw FOTA_DRAM_START			; not required for < 2.0
-	db 252 dup 0				; not required for < 2.0
+        db 0x100 - ( f_ver - c_start ) dup 0
+        db 'FOTA_ENGINE_VER_INFO_2.0'
+        db 232 dup 0
+        dw FOTA_DRAM_START                      ; not required for < 2.0
+        db 252 dup 0                            ; not required for < 2.0
 
 c_run:
-	str		lr, [bl_return_addr]	; preserve return address
+        str             lr, [bl_return_addr]    ; preserve return address
 
-	ldr		r0, [_key2]
-	ldrb		r0, [r0, 0]		; Menu Key
-	cmp		r0, 0
-	ldrne		r0, [s_atagcmdlineRM_a] ; quick and dirty address copy...
-	ldrne		r1, [s_atagcmdline_aa]
-	strne		r0, [r1]
-	bne		fota_run		; recovery mode
+        ldr             r0, [_key2]
+        ldrb            r0, [r0, 0]             ; Menu Key
+        cmp             r0, 0
+        ldrne           r0, [s_atagcmdlineRM_a] ; quick and dirty address copy...
+        ldrne           r1, [s_atagcmdline_aa]
+        strne           r0, [r1]
+        bne             fota_run                ; recovery mode
 
-	ldr		r0, [_key2]
-	ldrb		r0, [r0, 7]		; VolUP Key
-	cmp		r0, 0
-	ldrne		r0, [s_atagcmdlineRM_b] ; quick and dirty address copy...
-	ldrne		r1, [s_atagcmdline_aa]
-	strne		r0, [r1]
-	bne		fota_run		; bigmem
+        ldr             r0, [_key2]
+        ldrb            r0, [r0, 3]             ; Cam Key
+        cmp             r0, 0
+        ldrne           r0, [s_atagcmdlineRM_b] ; quick and dirty address copy...
+        ldrne           r1, [s_atagcmdline_aa]
+        strne           r0, [r1]
+        bne             fota_run                ; Rom 2
+
+        ldr             r0, [_key2]
+        ldrb            r0, [r0, 2]             ; Key 0, 2 Call
+                                                ; Key 0, 3 Cam
+                                                ; Key 0, 0 Menu
+                                                ; Key 0, 2 Power
+                                                ; Key 0, 4 VolDown
+                                                ; Key 0, 7 VolUp
+        cmp             r0, 0
+        ldrne           r0, [s_atagcmdlineRM_c] ; quick and dirty address copy...
+        ldrne           r1, [s_atagcmdline_aa]
+        strne           r0, [r1]
+        bne             fota_run                ; Android
+
+        ldr             r0, [_key2]
+        ldrb            r0, [r0, 4]             ; VolDown Key
+        cmp             r0, 0
+        ldrne           r0, [s_atagcmdlineRM_d] ; quick and dirty address copy...
+        ldrne           r1, [s_atagcmdline_aa]
+        strne           r0, [r1]
+        bne             fota_run                ; Firefox
 
 
-	ldr		r0, [_key2]
-	ldrb		r0, [r0, 2]
-	cmp		r0, 0
-	beq		fota_run		    ; not menu/home, not vol-up, and not call-key   - android
+        ldr             r0, [_key2]
+        cmp             r0, 0
+        beq             return_to_bl                    ; not menu/home, not vol-up, and not call-key   - android
 
 
 return_to_bl:
-	ldr	pc, [bl_return_addr]		 ; back to the bootloader
+        ldr     pc, [bl_return_addr]             ; back to the bootloader
 
 fota_dload_mode:
-	MOV	R0, 1
-	ADR	R1, used_download
-	STR	R0, [R1]
-	bl		enable_fota_output
-	bl		dloadmode
+        MOV     R0, 1
+        ADR     R1, used_download
+        STR     R0, [R1]
+        bl              enable_fota_output
+        bl              dloadmode
 
-	NORETURN
+        NORETURN
 
-	align 4
-	bl_return_addr				dw 0x0 ; filled in runtime
-	_key2					dw pressed_button
-	s_atagcmdlineRM_a			dw s_atagcmdlineRM
-	s_atagcmdline_aa			dw s_atagcmdline_a
-	s_atagcmdline_a 			dw s_atagcmdline
-	s_atagcmdlineRM_b			dw s_atagcmdlineRMb
+        align 4
+        bl_return_addr                          dw 0x0 ; filled in runtime
+        _key2                                   dw pressed_button
+        s_atagcmdlineRM_a                       dw s_atagcmdlineRM
+        s_atagcmdline_aa                        dw s_atagcmdline_a
+        s_atagcmdline_a                         dw s_atagcmdline
+        s_atagcmdlineRM_b                       dw s_atagcmdlineRMb
+        s_atagcmdlineRM_c                       dw s_atagcmdlineRMc
+        s_atagcmdlineRM_d                       dw s_atagcmdlineRMd
 
-	used_download				dw 0x0
+        used_download                           dw 0x0
 
-	s_atagcmdlineRM 			db 'recovery',0
-	s_atagcmdline				db 'normal',0
-	s_atagcmdlineRMb			db 'bigmem',0
+        s_atagcmdlineRM                         db 'recovery',0
+        s_atagcmdline                           db 'bada',0
+        s_atagcmdlineRMb                        db 'rom',0
+        s_atagcmdlineRMc                        db 'android',0
+        s_atagcmdlineRMd                        db 'firefox',0
 
-	align 4
+
+        align 4
 
 fota_run:
 }
@@ -122,24 +147,24 @@ macro END
 {
 
 magic_1:
-	code_len = magic_1 - c_start
-	db 0x280000 - code_len dup 0xFF
-	db 'BPDZ'
-	db 12 dup 0
-	dw 0xABCDABCD
-	dw FOTA_NAND_START
-	dw 0
-	db PRODUCT_CODE
-	db 27 dup 0
-	db 'fota'
-	dw 0
-	dw 6
-	dw 1
-	dw 2
-	dw 0x800
-	dw 0x20000
+        code_len = magic_1 - c_start
+        db 0x280000 - code_len dup 0xFF
+        db 'BPDZ'
+        db 12 dup 0
+        dw 0xABCDABCD
+        dw FOTA_NAND_START
+        dw 0
+        db PRODUCT_CODE
+        db 27 dup 0
+        db 'fota'
+        dw 0
+        dw 6
+        dw 1
+        dw 2
+        dw 0x800
+        dw 0x20000
 
 magic_2:
-	code_len = magic_2 - c_start
-	db 0x280410 - code_len dup 0
+        code_len = magic_2 - c_start
+        db 0x280410 - code_len dup 0
 }
